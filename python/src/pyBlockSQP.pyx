@@ -1,7 +1,15 @@
 # distutils: language = c++
 ### dddistutils: sources = Rectangle.cpp
 
+from __future__ import print_function
+
 from libc.stdio cimport FILE
+
+import numpy as np
+cimport numpy as np
+
+DTYPEd = np.double
+ctypedef np.double_t DTYPEd_t
 
 cdef extern from "blocksqp_matrix.hpp" namespace "blockSQP":
     cdef cppclass Matrix:
@@ -12,7 +20,18 @@ cdef extern from "blocksqp_matrix.hpp" namespace "blockSQP":
         int tflag                   #
 
         Matrix( int, int, int) except +     #                    ///< constructor with standard arguments
-        Matrix( int, int, double*, int = -1 ) except +    #
+        Matrix( int, int, double*, int) except +    #
+
+        int M() const #                                          ///< number of rows
+        int N() const #                                          ///< number of columns
+        int LDIM() const #                                       ///< leading dimensions
+        double *ARRAY() const#                                   ///< returns pointer to data array
+        int TFLAG() const #
+
+        double& get "operator()"( int i, int j )
+        #double& get "operator()"( int i, int j ) const
+        double& get "operator()"( int i )
+        #double& get "operator()"( int i ) const
 
         Matrix &Dimension( int, int, int)
         Matrix &Initialize( double (*)( int, int ) )
@@ -26,8 +45,17 @@ cdef extern from "blocksqp_matrix.hpp" namespace "blockSQP":
 
 cdef class PyMatrix:
     cdef Matrix *thisptr      # hold a C++ instance which we're wrapping
-    def __cinit__(self, int m = 1, int n = 1, int ldim = -1):
-        self.thisptr = new Matrix(m, n, ldim)
+    def __cinit__(self, data=None, int m = 1, int n = 1, int ldim = -1):
+        cdef np.ndarray[DTYPEd_t, ndim=1] np_data_flat
+        if data is not None:
+            print("Using numpy data")
+            # Matrix uses column major
+            np_data_flat = np.array(data, dtype=DTYPEd).flatten('F')
+            print(np_data_flat)
+            self.thisptr = new Matrix(m, n, <double*>np_data_flat.data, ldim)
+        else:
+            self.thisptr = new Matrix(m, n, ldim)
+
     def __dealloc__(self):
         del self.thisptr
 
@@ -40,8 +68,16 @@ cdef class PyMatrix:
         return self
 
     def Print(self):
-        self.thisptr.Print()
+        # does not work: segfault
+        #self.thisptr.Print()
+        #return self
+        cdef int i, j
+        for i in range(self.thisptr.M()):
+            for j in range(self.thisptr.N()):
+                print(self.thisptr.get(i, j), end=" ")
+            print()
         return self
+
 
 
 #cdef extern from "blocksqp_problemspec.hpp" namespace "blockSQP":
