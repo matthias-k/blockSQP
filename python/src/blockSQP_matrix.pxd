@@ -34,17 +34,24 @@ cdef extern from "blocksqp_matrix.hpp" namespace "blockSQP":
                                int = 1       #  ///< Flag for format
                              ) const
 
+    cdef cppclass SymMatrix:
+        SymMatrix(int)
+        SymMatrix(int, double*)
+        SymMatrix(int, int, int)
+        SymMatrix(int, int, double*, int)
+        SymMatrix( const Matrix& A )
+        SymMatrix( const SymMatrix& A )
 
-#cdef extern from "blocksqp_problemspec.hpp" namespace "blockSQP":
-#    cdef cppclass Problemspec:
-#        int         nVar;               ///< number of variables
-#        int         nCon;               ///< number of constraints
-#        int         nnCon;              ///< number of nonlinear constraints
-#
-#        double      objLo;              ///< lower bound for objective
-#        double      objUp;              ///< upper bound for objective
-#        Matrix      bl;                 ///< lower bounds of variables and constraints
-#        Matrix      bu;                 ///< upper bounds of variables and constraints
-#
-#        int         nBlocks;            ///< number of separable blocks of Lagrangian
-#        int*        blockIdx;           ///< [blockwise] index in the variable vector where a block starts
+        double& get "operator()"( int i, int j )
+        #double& "operator()"( int i, int j ) const;
+        double& get "operator()"( int i )
+        #double& "operator()"( int i ) const;
+
+        SymMatrix &Dimension(int)
+        SymMatrix &Dimension(int, int, int )
+        SymMatrix &Initialize( double (*)( int, int ) )
+        SymMatrix &Initialize( double )
+
+        SymMatrix& Submatrix( const Matrix&, int, int, int, int)
+        SymMatrix& Arraymatrix( int, double*)
+        SymMatrix& Arraymatrix( int, int, double*, int)
