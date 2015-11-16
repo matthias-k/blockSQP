@@ -1,4 +1,7 @@
+.PHONY: build
 build:
+	rm -rf build
+	rm -f pyBlockSQP.so
 	python setup.py build_ext --inplace
 
 shell:
