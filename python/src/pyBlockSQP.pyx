@@ -7,6 +7,9 @@ from libc.stdio cimport FILE
 
 from blockSQP_matrix cimport Matrix, SymMatrix
 from blockSQP_options cimport SQPoptions
+from blockSQP_problemspec import Problemspec
+from blockSQP_stats import SQPstats
+from blockSQP_iterate import SQPiterate
 
 import numpy as np
 cimport numpy as np
