@@ -19,7 +19,7 @@ cdef extern from "blocksqp_iterate.hpp" namespace "blockSQP":
         double tol                                  #  current optimality tolerance
 
         Matrix xi                                   #  variable vector
-        Matrix "lambda"                               #  dual variables
+        Matrix lambda_ "lambda"                               #  dual variables
         Matrix constr                               #  constraint vector
 
         Matrix constrJac                            #  full constraint Jacobian (not used in sparse mode)
@@ -45,26 +45,21 @@ cdef extern from "blocksqp_iterate.hpp" namespace "blockSQP":
         int *hessIndCol                             #  indices to first entry of columns (nCols+1)
         int *hessIndLo                              #  Indices to first entry of lower triangle (including diagonal) (nCols)
 
-        /*
-         * Variables for QP solver
-         */
+
+        # Variables for QP solver
         Matrix deltaBl                              #  lower bounds for current step
         Matrix deltaBu                              #  upper bounds for current step
         Matrix lambdaQP                             #  dual variables of QP
         Matrix AdeltaXi                             #  product of constraint Jacobian with deltaXi
 
-        /*
-         * For modified BFGS updates
-         */
+        # For modified BFGS updates
         Matrix deltaNorm                            #  sTs
         Matrix deltaNormOld                         #  (from previous iteration)
         Matrix deltaGamma                           #  sTy
         Matrix deltaGammaOld                        #  (from previous iteration)
         int *noUpdateCounter                        #  count skipped updates for each block
 
-        /*
-         * Variables for globalization strategy
-         */
+        # Variables for globalization strategy
         int steptype                                #  is current step a restoration step (1)?
         double alpha                                #  stepsize for line search
         int nSOCS                                   #  number of second-order correction steps

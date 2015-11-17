@@ -44,7 +44,7 @@ cdef extern from "blocksqp_stats.hpp" namespace "blockSQP":
         # Print current iterate of primal variables to file
         void printPrimalVars( const Matrix &xi )
         # Print current iterate of dual variables to file
-        void printDualVars( const Matrix &lambda )
+        void printDualVars( const Matrix &lambda_ )
         # Print all QP data to files to be read in MATLAB
         void dumpQPMatlab( Problemspec *prob, SQPiterate *vars, int sparseQP )
         void dumpQPCpp( Problemspec *prob, SQPiterate *vars, qpOASES::SQProblem *qp, int sparseQP )
