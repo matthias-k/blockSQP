@@ -4,9 +4,10 @@ from libcpp cimport bool
 from libc.stdio cimport FILE
 
 from blockSQP_problemspec cimport Problemspec
-from blockSQP_matrix cimport Matrix
+from blockSQP_matrix cimport Matrix, SymMatrix
 from blockSQP_defs cimport PATHSTR
-from blockSQP_iterate import SQPiterate
+from blockSQP_iterate cimport SQPiterate
+from blockSQP_options cimport SQPoptions
 
 
 cdef extern from "blocksqp_stats.hpp" namespace "blockSQP":
@@ -47,7 +48,7 @@ cdef extern from "blocksqp_stats.hpp" namespace "blockSQP":
         void printDualVars( const Matrix &lambda_ )
         # Print all QP data to files to be read in MATLAB
         void dumpQPMatlab( Problemspec *prob, SQPiterate *vars, int sparseQP )
-        void dumpQPCpp( Problemspec *prob, SQPiterate *vars, qpOASES::SQProblem *qp, int sparseQP )
+        #void dumpQPCpp( Problemspec *prob, SQPiterate *vars, qpOASES::SQProblem *qp, int sparseQP )
         void printVectorCpp( FILE *outfile, double *vec, int len, char* varname )
         void printVectorCpp( FILE *outfile, int *vec, int len, char* varname )
         void printCppNull( FILE *outfile, char* varname )

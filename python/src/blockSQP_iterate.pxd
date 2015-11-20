@@ -2,10 +2,13 @@
 
 from libcpp cimport bool
 from libc.stdio cimport FILE
+from libcpp.set cimport set
+from libcpp.pair cimport pair
 
 from blockSQP_problemspec cimport Problemspec
 from blockSQP_matrix cimport Matrix, SymMatrix
 from blockSQP_defs cimport PATHSTR
+from blockSQP_options cimport SQPoptions
 
 
 cdef extern from "blocksqp_iterate.hpp" namespace "blockSQP":
@@ -66,7 +69,7 @@ cdef extern from "blocksqp_iterate.hpp" namespace "blockSQP":
         int reducedStepCount                        #  count number of consecutive reduced steps,
         Matrix deltaH                               #  scalars for inertia correction (filter line search w indef Hessian)
         Matrix trialXi                              #  new trial iterate (for line search)
-        std::set< std::pair<double,double> > *filter#  Filter contains pairs (constrVio, objective)
+        set[pair[double,double] ] *filter#  Filter contains pairs (constrVio, objective)
 
         # Call allocation and initializing routines
         SQPiterate( Problemspec* prob, SQPoptions* param, bool full )
@@ -84,5 +87,5 @@ cdef extern from "blocksqp_iterate.hpp" namespace "blockSQP":
         void allocAlg( Problemspec* prob, SQPoptions* param )
         # Set initial filter, objective function, tolerances etc.
         void initIterate( SQPoptions* param )
-        ~SQPiterate( void )
+        #~SQPiterate( void )
 

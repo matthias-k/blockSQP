@@ -9,7 +9,7 @@ cimport cpython.ref as cpy_ref
 from blockSQP_matrix cimport Matrix, SymMatrix
 from blockSQP_options cimport SQPoptions
 from blockSQP_problemspec cimport IProblemspec
-#from blockSQP_stats cimport SQPstats
+from blockSQP_stats cimport SQPstats
 #from blockSQP_iterate cimport SQPiterate
 
 import numpy as np
@@ -327,6 +327,15 @@ cdef class PyProblemspec:
 
     def __dealloc__(self):
         del self.thisptr
+
+
+#cdef class PySQPStats:
+#    cdef IProblemspec *thisptr      # hold a C++ instance which we're wrapping
+#    def __cinit__(self):
+#        self.thisptr = new IProblemspec(<cpy_ref.PyObject*>self)
+#
+#    def __dealloc__(self):
+#        del self.thisptr
 
 
 #cdef class PySQPiterate:
