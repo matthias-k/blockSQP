@@ -329,13 +329,13 @@ cdef class PyProblemspec:
         del self.thisptr
 
 
-#cdef class PySQPStats:
-#    cdef IProblemspec *thisptr      # hold a C++ instance which we're wrapping
-#    def __cinit__(self):
-#        self.thisptr = new IProblemspec(<cpy_ref.PyObject*>self)
-#
-#    def __dealloc__(self):
-#        del self.thisptr
+cdef class PySQPStats:
+    cdef SQPstats *thisptr      # hold a C++ instance which we're wrapping
+    def __cinit__(self, char* filename):
+        self.thisptr = new SQPstats(filename)
+
+    def __dealloc__(self):
+        del self.thisptr
 
 
 #cdef class PySQPiterate:
