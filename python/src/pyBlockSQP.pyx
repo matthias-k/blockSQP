@@ -6,9 +6,9 @@ from __future__ import print_function
 from libc.stdio cimport FILE
 cimport cpython.ref as cpy_ref
 
-from src.blockSQP_matrix cimport Matrix, SymMatrix
-from src.blockSQP_options cimport SQPoptions
-from src.blockSQP_problemspec cimport IProblemspec
+from blockSQP_matrix cimport Matrix, SymMatrix
+from blockSQP_options cimport SQPoptions
+from blockSQP_problemspec cimport IProblemspec
 #from blockSQP_stats cimport SQPstats
 #from blockSQP_iterate cimport SQPiterate
 

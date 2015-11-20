@@ -2,7 +2,7 @@
 
 cimport cpython.ref as cpy_ref
 
-from src.blockSQP_matrix cimport Matrix, SymMatrix
+from blockSQP_matrix cimport Matrix, SymMatrix
 
 #cdef extern from "blocksqp_problemspec.hpp" namespace "blockSQP":
 cdef extern from "IProblemspec.h" namespace "blockSQP":

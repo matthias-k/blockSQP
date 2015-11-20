@@ -4,7 +4,7 @@ namespace blockSQP {
 
 IProblemspec::IProblemspec(PyObject *obj): m_obj(obj) {
     // Provided by "pyBlockSQP_api.h"
-	if (import_src__pyBlockSQP()) {
+	if (import_pyBlockSQP()) {
 	} else {
         Py_XINCREF(this->m_obj);
 	}

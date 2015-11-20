@@ -4,7 +4,7 @@ from Cython.Build import cythonize
 
 
 extensions = [
-    Extension("pyBlockSQP", ['src/pyBlockSQP.pyx', 'src/IProblemspec.cpp'],
+    Extension("pyBlockSQP", ['src/IProblemspec.cpp', 'src/pyBlockSQP.pyx'],
               include_dirs = ['/opt/blockSQP/include'],
               libraries = ['blockSQP', 'qpOASES', 'openblas'],
               extra_link_args=["-L/opt/blockSQP/lib",
