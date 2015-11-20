@@ -1,9 +1,9 @@
 #ifndef IPROBLEMSPEC_H_
 #define IPROBLEMSPEC_H_
 
-#include "pyBlockSQP_api.h"
 #include "blocksqp_problemspec.hpp"
 #include "blocksqp_matrix.hpp"
+#include "pyBlockSQP_api.h"
 
 namespace blockSQP {
 

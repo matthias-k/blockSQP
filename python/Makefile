@@ -2,6 +2,9 @@
 build:
 	rm -rf build
 	rm -f pyBlockSQP.so
+	rm -f src/pyBlockSQP_api.h
+	rm -f src/pyBlockSQP.cpp
+	rm -f src/pyBlockSQP.h
 	python setup.py build_ext --inplace
 
 shell:
