@@ -330,6 +330,49 @@ cdef class PyProblemspec:
     def __dealloc__(self):
         del self.thisptr
 
+    property nVar:
+        def __get__(self): return self.thisptr.nVar
+        def __set__(self, int nVar): self.thisptr.nVar = nVar
+
+    property nCon:
+        def __get__(self): return self.thisptr.nCon
+        def __set__(self, int nCon): self.thisptr.nCon = nCon
+
+    property nnCon:
+        def __get__(self): return self.thisptr.nnCon
+        def __set__(self, int nnCon): self.thisptr.nnCon = nnCon
+
+    property objLo:
+        def __get__(self): return self.thisptr.objLo
+        def __set__(self, double objLo): self.thisptr.objLo = objLo
+
+    property objUp:
+        def __get__(self): return self.thisptr.objUp
+        def __set__(self, double objUp): self.thisptr.objUp = objUp
+
+#    property bl:
+#        def __get__(self): return self.thisptr.bl
+#        def __set__(self, bl): self.thisptr.bl = bl
+
+    property nBlocks:
+        def __get__(self): return self.thisptr.nBlocks
+        def __set__(self, int nBlocks): self.thisptr.nBlocks = nBlocks
+
+    property blockIdx:
+        def __get__(self):
+            cdef int n = self.thisptr.nBlocks
+            cdef int [:] blockIdx_view = <int[:n]*>self.thisptr.blockIdx
+            return blockIdx_view
+        def __set__(self, blockIdx):
+            # TODO: right now we need a np.int32 np-array
+            # should this method also work with int64 and python lists?
+            # Or should this be handled in a more highlevel
+            # wrapper class in python?
+            cdef int [::1] blockIdx_view = blockIdx
+            # Make sure we have a reference in python
+            self.blockIdx_view = blockIdx_view
+            self.thisptr.nBlocks = len(blockIdx_view)
+            self.thisptr.blockIdx = &blockIdx_view[0]
 
 cdef class PySQPStats:
     cdef SQPstats *thisptr      # hold a C++ instance which we're wrapping
