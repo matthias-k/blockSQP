@@ -23,11 +23,13 @@ ctypedef np.double_t DTYPEd_t
 cdef class PyMatrix:
     cdef Matrix *thisptr      # hold a C++ instance which we're wrapping
     def __cinit__(self, int m = 1, int n = 1, data=None, int ldim = -1):
-        cdef np.ndarray[DTYPEd_t, ndim=1] np_data_flat
+        cdef DTYPEd_t [::1, :] data_view
+        #cdef np.ndarray[DTYPEd_t, ndim=1] np_data_flat
         if data is not None:
             # Matrix uses column major
-            np_data_flat = np.array(data, dtype=DTYPEd).flatten('F')
-            self.thisptr = new Matrix(m, n, <double*>np_data_flat.data, ldim)
+            #np_data_flat = np.array(data, dtype=DTYPEd).flatten('F')
+            data_view = data
+            self.thisptr = new Matrix(m, n, &data_view[0,0] if n*m>0 else NULL, ldim)
         else:
             self.thisptr = new Matrix(m, n, ldim)
 
