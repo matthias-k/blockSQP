@@ -1,8 +1,9 @@
 # distutils: language = c++
-### dddistutils: sources = Rectangle.cpp
 
-from blocksqp_matrix cimport Matrix
-from blocksqp_problemspec import Problemspec
+from blockSQP_matrix cimport Matrix
+from blockSQP_problemspec cimport Problemspec
+from blockSQP_options cimport SQPoptions
+from blockSQP_stats cimport SQPstats
 
 cdef extern from "blocksqp_method.hpp" namespace "blockSQP":
     cdef cppclass SQPmethod:

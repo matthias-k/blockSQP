@@ -8,9 +8,10 @@ cimport cpython.ref as cpy_ref
 
 from blockSQP_matrix cimport Matrix, SymMatrix
 from blockSQP_options cimport SQPoptions
-from blockSQP_problemspec cimport IProblemspec
+from blockSQP_problemspec cimport IProblemspec, Problemspec
 from blockSQP_stats cimport SQPstats
 #from blockSQP_iterate cimport SQPiterate
+from blockSQP_method cimport SQPmethod
 
 import numpy as np
 cimport numpy as np
@@ -320,6 +321,7 @@ cdef public api int cy_call_evaluate_func_and_grad(object self,
         error[0] = 0
         objval_py, constr_view, gradObj_view, constrJac_view = func(xi_view, lambda_view)
 
+
 cdef class PyProblemspec:
     cdef IProblemspec *thisptr      # hold a C++ instance which we're wrapping
     def __cinit__(self):
@@ -336,6 +338,22 @@ cdef class PySQPStats:
 
     def __dealloc__(self):
         del self.thisptr
+
+
+cdef class PySQPMethod:
+    cdef SQPmethod *thisptr      # hold a C++ instance which we're wrapping
+    def __cinit__(self, PyProblemspec problemspec, PySQPoptions options, PySQPStats stats):
+
+        cdef Problemspec* _problemspec = problemspec.thisptr
+        cdef SQPoptions* _options =  options.thisptr
+        cdef SQPstats* _stats = stats.thisptr
+        self.thisptr = new SQPmethod(_problemspec,
+                                     _options,
+                                     _stats)
+
+    def __dealloc__(self):
+        del self.thisptr
+
 
 
 #cdef class PySQPiterate:
