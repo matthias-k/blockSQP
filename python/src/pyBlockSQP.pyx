@@ -361,17 +361,23 @@ cdef class PyProblemspec:
     property blockIdx:
         def __get__(self):
             cdef int n = self.thisptr.nBlocks
-            cdef int [:] blockIdx_view = <int[:n]*>self.thisptr.blockIdx
+            cdef int [::1] blockIdx_view = <int[:n+1]*>self.thisptr.blockIdx
             return blockIdx_view
         def __set__(self, blockIdx):
             # TODO: right now we need a np.int32 np-array
             # should this method also work with int64 and python lists?
             # Or should this be handled in a more highlevel
             # wrapper class in python?
+            if not len(blockIdx) > 0:
+                raise ValueError('blockIdx has to be at least of length 1')
+            if not blockIdx[0] == 0:
+                raise ValueError('it is required that blockIdx[0]==0')
+            if not blockIdx[-1] == self.nVar:
+                raise ValueError('it is required that blockIdx[-1] == nVar!')
             cdef int [::1] blockIdx_view = blockIdx
             # Make sure we have a reference in python
             self.blockIdx_view = blockIdx_view
-            self.thisptr.nBlocks = len(blockIdx_view)
+            self.thisptr.nBlocks = len(blockIdx_view)-1
             self.thisptr.blockIdx = &blockIdx_view[0]
 
 cdef class PySQPStats:
