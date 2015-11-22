@@ -126,8 +126,51 @@ cdef class PySymMatrix(PyMatrix):
         return self
 
     def Initialize(self, double value):
-        self.thisptr.Initialize(value)
+        (<SymMatrix*>(self.thisptr)).Initialize(value)
         return self
+
+    @property
+    def numpy_data(self):
+        cdef Matrix* matrix = self.thisptr
+        cdef int m = matrix.M()
+        cdef int n = matrix.N()
+
+        cdef int length = m*(n+1)/2
+
+        # TODO: m*n==0
+        cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:length]>matrix.array
+        return np.array(data_view)
+
+    @property
+    def as_array(self):
+        data_array = self.numpy_data
+        cdef int m = self.thisptr.M()
+        cdef int n = self.thisptr.N()
+
+        output = np.empty((m, n))
+
+        output[np.triu_indices(n)] = data_array
+        output.T[np.triu_indices(n)] = data_array
+
+        return output
+
+    @classmethod
+    def from_numpy_2d(cls, data):
+        """
+        Construct PySymMatrix from 2d numpy array.
+        As numpy does not support storing symmetric
+        matrices explicitly, the data has to be copied
+        and reordered. Only the upper triangle of data
+        is used.
+        """
+        assert data.ndim == 2
+        cdef int m, n
+        m, n= data.shape
+        assert m == n
+
+        flat_data = data[np.triu_indices(n)].copy().astype(np.float)
+
+        return cls(m, data = flat_data)
 
     def Print(self):
         # does not work: segfault
