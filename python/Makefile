@@ -1,4 +1,4 @@
-.PHONY: build
+.PHONY: build tests
 build:
 	rm -rf build
 	rm -f pyBlockSQP.so
@@ -9,3 +9,5 @@ build:
 
 shell:
 	LD_LIBRARY_PATH=/opt/blockSQP/lib/:/opt/qpOASES-3.2.0/bin ipython2
+tests:
+	LD_LIBRARY_PATH=/opt/blockSQP/lib/:/opt/qpOASES-3.2.0/bin nosetests

@@ -34,7 +34,7 @@ cdef extern from "blocksqp_matrix.hpp" namespace "blockSQP":
                                int = 1       #  ///< Flag for format
                              ) const
 
-    cdef cppclass SymMatrix:
+    cdef cppclass SymMatrix(Matrix):
         SymMatrix(int)
         SymMatrix(int, double*)
         SymMatrix(int, int, int)
@@ -48,10 +48,10 @@ cdef extern from "blocksqp_matrix.hpp" namespace "blockSQP":
         #double& "operator()"( int i ) const;
 
         SymMatrix &Dimension(int)
-        SymMatrix &Dimension(int, int, int )
-        SymMatrix &Initialize( double (*)( int, int ) )
-        SymMatrix &Initialize( double )
+        #SymMatrix &Dimension(int, int, int )
+        #SymMatrix &Initialize( double (*)( int, int ) )
+        #SymMatrix &Initialize( double )
 
-        SymMatrix& Submatrix( const Matrix&, int, int, int, int)
-        SymMatrix& Arraymatrix( int, double*)
-        SymMatrix& Arraymatrix( int, int, double*, int)
+        #SymMatrix& Submatrix( const Matrix&, int, int, int, int)
+        #SymMatrix& Arraymatrix( int, double*)
+        #SymMatrix& Arraymatrix( int, int, double*, int)

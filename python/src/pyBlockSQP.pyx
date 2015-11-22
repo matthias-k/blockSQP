@@ -24,12 +24,11 @@ cdef class PyMatrix:
     cdef Matrix *thisptr      # hold a C++ instance which we're wrapping
     cdef object py_data
     def __cinit__(self, int m = 1, int n = 1, data=None, int ldim = -1):
+        if type(self) is not PyMatrix:
+            return
         cdef DTYPEd_t [::1] data_view
-        #cdef np.ndarray[DTYPEd_t, ndim=1] np_data_flat
         if data is not None:
             self.py_data = data
-            # Matrix uses column major
-            #np_data_flat = np.array(data, dtype=DTYPEd).flatten('F')
             data_view = data
             self.thisptr = new Matrix(m, n, &data_view[0] if n*m>0 else NULL, ldim)
             self.thisptr.tflag = 1 #thisptr does not own the data
@@ -37,19 +36,39 @@ cdef class PyMatrix:
             self.thisptr = new Matrix(m, n, ldim)
 
     def __dealloc__(self):
+        if type(self) is not PyMatrix:
+            return
         del self.thisptr
+
+    @property
+    def numpy_data(self):
+        cdef Matrix* matrix = self.thisptr
+        cdef int m = matrix.M()
+        cdef int n = matrix.N()
+
+        # TODO: m*n==0
+        cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
+        return np.array(data_view)
+
+    @property
+    def as_array(self):
+        data_array = self.numpy_data
+        cdef int m = self.thisptr.M()
+        cdef int n = self.thisptr.N()
+
+        return data_array.reshape((m, n), order='F')
 
     @classmethod
     def from_numpy_2d(cls, data):
         """
         Construct pymatrix from 2d numpy array.
-        If data is not fortran contigous, it
-        will be copied.
+        If data is not fortran contigous or of wrong
+        type, it will be copied.
         """
         assert data.ndim == 2
         cdef int m, n
         m, n= data.shape
-        flat_data = data.ravel('F')
+        flat_data = data.astype(np.float).ravel('F')
 
         return cls(m, n, data = flat_data)
 
@@ -76,6 +95,7 @@ cdef class PyMatrix:
     def copy(self):
         return from_blockSQP_matrix(self.thisptr)
 
+
 cdef from_blockSQP_matrix(Matrix* matrix):
     cdef int m = matrix.M()
     cdef int n = matrix.N()
@@ -85,22 +105,24 @@ cdef from_blockSQP_matrix(Matrix* matrix):
     cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
     return PyMatrix(m, n, data_view)
 
-cdef class PySymMatrix:
-    cdef SymMatrix *thisptr      # hold a C++ instance which we're wrapping
+
+cdef class PySymMatrix(PyMatrix):
+    #cdef SymMatrix *thisptr      # hold a C++ instance which we're wrapping
     def __cinit__(self, int m = 1, data=None, int n = 1, int ldim = -1):
-        cdef np.ndarray[DTYPEd_t, ndim=1] np_data_flat
+        cdef DTYPEd_t [::1] data_view
         if data is not None:
-            # Matrix uses column major
-            np_data_flat = np.array(data, dtype=DTYPEd).flatten('F')
-            self.thisptr = new SymMatrix(m, n, <double*>np_data_flat.data, ldim)
+            self.py_data = data
+            data_view = data
+            self.thisptr = <Matrix*> new SymMatrix(m, n, &data_view[0] if n*m>0 else NULL, ldim)
+            self.thisptr.tflag = 1 #thisptr does not own the data
         else:
-            self.thisptr = new SymMatrix(m, n, ldim)
+            self.thisptr = <Matrix*>new SymMatrix(m, n, ldim)
 
     def __dealloc__(self):
         del self.thisptr
 
     def Dimension(self, int m, int n=1, int ldim = -1):
-        self.thisptr.Dimension(m, n, ldim)
+        (<SymMatrix*>(self.thisptr)).Dimension(m, n, ldim)
         return self
 
     def Initialize(self, double value):
