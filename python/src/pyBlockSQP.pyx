@@ -39,6 +39,20 @@ cdef class PyMatrix:
     def __dealloc__(self):
         del self.thisptr
 
+    @classmethod
+    def from_numpy_2d(cls, data):
+        """
+        Construct pymatrix from 2d numpy array.
+        If data is not fortran contigous, it
+        will be copied.
+        """
+        assert data.ndim == 2
+        cdef int m, n
+        m, n= data.shape
+        flat_data = data.ravel('F')
+
+        return cls(m, n, data = flat_data)
+
     def Dimension(self, int m, int n=1, int ldim = -1):
         self.thisptr.Dimension(m, n, ldim)
         return self
