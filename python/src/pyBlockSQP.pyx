@@ -24,12 +24,15 @@ cdef class PyMatrix:
     cdef Matrix *thisptr      # hold a C++ instance which we're wrapping
     def __cinit__(self, int m = 1, int n = 1, data=None, int ldim = -1):
         cdef DTYPEd_t [::1, :] data_view
+        #cdef object py_data
         #cdef np.ndarray[DTYPEd_t, ndim=1] np_data_flat
         if data is not None:
+            #self.py_data = data
             # Matrix uses column major
             #np_data_flat = np.array(data, dtype=DTYPEd).flatten('F')
             data_view = data
             self.thisptr = new Matrix(m, n, &data_view[0,0] if n*m>0 else NULL, ldim)
+            self.thisptr.tflag = 0 #thisptr does not own the data
         else:
             self.thisptr = new Matrix(m, n, ldim)
 
