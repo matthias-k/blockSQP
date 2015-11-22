@@ -53,6 +53,7 @@ cdef class PyMatrix:
 
         return cls(m, n, data = flat_data)
 
+
     def Dimension(self, int m, int n=1, int ldim = -1):
         self.thisptr.Dimension(m, n, ldim)
         return self
@@ -71,6 +72,18 @@ cdef class PyMatrix:
                 print(self.thisptr.get(i, j), end=" ")
             print()
         return self
+
+    def copy(self):
+        return from_blockSQP_matrix(self.thisptr)
+
+cdef from_blockSQP_matrix(Matrix* matrix):
+    cdef int m = matrix.M()
+    cdef int n = matrix.N()
+    print(m, n)
+
+    # TODO: m*n==0
+    cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
+    return PyMatrix(m, n, data_view)
 
 cdef class PySymMatrix:
     cdef SymMatrix *thisptr      # hold a C++ instance which we're wrapping
