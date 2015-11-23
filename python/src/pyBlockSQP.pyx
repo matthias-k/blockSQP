@@ -744,25 +744,158 @@ cdef class PySQPiterate:
     def __dealloc__(self):
         pass
 
-    property xi:
-        def __get__(self):
-            return from_blockSQP_matrix(&(self.thisptr.xi))
 
-    property lambda_:
-        def __get__(self):
-            return from_blockSQP_matrix(&(self.thisptr.lambda_))
 
-    property nBlocks:
-        def __get__(self):
-            return self.thisptr.nBlocks
 
-    property hess:
-        def __get__(self):
-            blocks = []
-            cdef int i
-            cdef SymMatrix* this_hess
-            for i in range(self.thisptr.nBlocks):
-                this_hess = &(self.thisptr.hess[i])
-                blocks.append(from_blockSQP_symmatrix(this_hess))
-            return blocks
 
+
+
+    property obj:  # double
+        def __get__(self): return self.thisptr.obj
+
+    property qpObj:  # double
+        def __get__(self): return self.thisptr.qpObj
+
+    property cNorm:  # double
+        def __get__(self): return self.thisptr.cNorm
+
+    property cNormS:  # double
+        def __get__(self): return self.thisptr.cNormS
+
+    property gradNorm:  # double
+        def __get__(self): return self.thisptr.gradNorm
+
+    property lambdaStepNorm:  # double
+        def __get__(self): return self.thisptr.lambdaStepNorm
+
+    property tol:  # double
+        def __get__(self): return self.thisptr.tol
+
+    property xi:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.xi))
+
+    property lambda_:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.lambda_))
+
+    property constr:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.constr))
+
+    property constrJac:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.constrJac))
+
+    property jacNz:  # double*
+        def __get__(self):
+            if self.thisptr.jacNz  == NULL: return None
+            cdef int nVar = self.thisptr.xi.M()
+            cdef int nnz = self.thisptr.jacIndCol[nVar]
+            cdef DTYPEd_t[::1] jacNz_view = <DTYPEd_t[:nnz]>self.thisptr.jacNz
+            return np.asarray(jacNz_view)
+
+    property jacIndRow:  # int*
+        def __get__(self):
+            if self.thisptr.jacNz  == NULL: return None
+            cdef int nVar = self.thisptr.xi.M()
+            cdef int nnz = self.thisptr.jacIndCol[nVar]
+            cdef int[::1] jacIndRow_view = <int[:nnz]>self.thisptr.jacIndRow
+            return np.asarray(jacIndRow_view)
+
+    property jacIndCol:  # int*
+        def __get__(self):
+            if self.thisptr.jacNz  == NULL: return None
+            cdef int nVar = self.thisptr.xi.M()
+            cdef int[::1] jacIndCol_view = <int[:nVar+1]>self.thisptr.jacIndCol
+            return np.asarray(jacIndCol_view)
+
+    property deltaMat:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaMat))
+
+    property deltaXi:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaXi))
+
+    property gradObj:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.gradObj))
+
+    property gradLagrange:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.gradLagrange))
+
+    property gammaMat:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.gammaMat))
+
+    property gamma:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.gamma))
+
+    property nBlocks:  # int
+        def __get__(self): return self.thisptr.nBlocks
+
+    property blockIdx:  # int*
+        def __get__(self):
+            cdef int nBlocks = self.thisptr.nBlocks
+            cdef int[::1] blockIdx_view = <int[:nBlocks+1]>self.thisptr.blockIdx
+            return np.asarray(blockIdx_view)
+
+    property hess:  # SymMatrix*
+        def __get__(self):
+            if self.thisptr.hess==NULL: return None
+            return [from_blockSQP_symmatrix(&(self.thisptr.hess[i])) for i in range(self.thisptr.nBlocks)]
+
+    property hess1:  # SymMatrix*
+        def __get__(self):
+            if self.thisptr.hess1==NULL: return None
+            return [from_blockSQP_symmatrix(&(self.thisptr.hess1[i])) for i in range(self.thisptr.nBlocks)]
+
+    property hess2:  # SymMatrix*
+        def __get__(self):
+            if self.thisptr.hess2==NULL: return None
+            return [from_blockSQP_symmatrix(&(self.thisptr.hess2[i])) for i in range(self.thisptr.nBlocks)]
+
+        # Skipped: double* hessNz
+        # Skipped: int* hessIndRow
+        # Skipped: int* hessIndCol
+        # Skipped: int* hessIndLo
+    property deltaBl:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaBl))
+
+    property deltaBu:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaBu))
+
+    property lambdaQP:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.lambdaQP))
+
+    property AdeltaXi:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.AdeltaXi))
+
+    property deltaNorm:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaNorm))
+
+    property deltaNormOld:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaNormOld))
+
+    property deltaGamma:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaGamma))
+
+    property deltaGammaOld:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaGammaOld))
+
+    property noUpdateCounter:  # int*
+        def __get__(self):
+            cdef int nBlocks = self.thisptr.nBlocks
+            cdef int[::1] noUpdateCounter_view = <int[:nBlocks]>self.thisptr.noUpdateCounter
+            return np.asarray(noUpdateCounter_view)
+
+    property steptype:  # int
+        def __get__(self): return self.thisptr.steptype
+
+    property alpha:  # double
+        def __get__(self): return self.thisptr.alpha
+
+    property nSOCS:  # int
+        def __get__(self): return self.thisptr.nSOCS
+
+    property reducedStepCount:  # int
+        def __get__(self): return self.thisptr.reducedStepCount
+
+    property deltaH:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.deltaH))
+
+    property trialXi:  # Matrix
+        def __get__(self): return from_blockSQP_matrix(&(self.thisptr.trialXi))
