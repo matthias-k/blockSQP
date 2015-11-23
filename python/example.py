@@ -79,6 +79,15 @@ m = pyBlockSQP.PySQPMethod(p, opts, s)
 
 m.init()
 
-m.run(100)
+ret = m.run(100)
 
 m.finish()
+
+if ret == 1:
+    print("***Maximum number of iterations reached.***")
+
+print("Primal solution:")
+m.vars.xi.Print()
+
+print("Dual solution")
+m.vars.lambda_.Print()

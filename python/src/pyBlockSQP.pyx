@@ -10,11 +10,13 @@ from blockSQP_matrix cimport Matrix, SymMatrix
 from blockSQP_options cimport SQPoptions
 from blockSQP_problemspec cimport IProblemspec, Problemspec
 from blockSQP_stats cimport SQPstats
-#from blockSQP_iterate cimport SQPiterate
+from blockSQP_iterate cimport SQPiterate
 from blockSQP_method cimport SQPmethod
 
 import numpy as np
 cimport numpy as np
+
+np.import_array()
 
 DTYPEd = np.double
 ctypedef np.double_t DTYPEd_t
@@ -626,7 +628,7 @@ cdef class PySQPMethod:
 
     def run(self, int maxIt, int warmStart = 0):
         """Main Loop of SQP method"""
-        self.thisptr.run(maxIt, warmStart)
+        return self.thisptr.run(maxIt, warmStart)
 
     def finish(self):
         """all after the last call of run, to close output files etc. """
@@ -636,13 +638,32 @@ cdef class PySQPMethod:
         """Print information about the SQP method"""
         self.thisptr.printInfo(printLevel)
 
+    property vars:
+        def __get__(self):
+            py_sqp_iterate = PySQPiterate()
+            py_sqp_iterate.thisptr = self.thisptr.vars
+            return py_sqp_iterate
 
 
 
-#cdef class PySQPiterate:
-#    cdef SQPiterate *thisptr      # hold a C++ instance which we're wrapping
-#    def __cinit__(self, problemspec, sqpoptions, ):
-#        self.thisptr = new SQPiterate()
-#
-#    def __dealloc__(self):
-#        del self.thisptr
+
+cdef class PySQPiterate:
+    """
+    This class is only used to interface existing SQPiterates.
+    Therefore it does not free it's SQPiterate instance on
+    __dealloc__.
+    """
+    cdef SQPiterate *thisptr      # hold a C++ instance which we're wrapping
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __dealloc__(self):
+        pass
+
+    property xi:
+        def __get__(self):
+            return from_blockSQP_matrix(&(self.thisptr.xi))
+
+    property lambda_:
+        def __get__(self):
+            return from_blockSQP_matrix(&(self.thisptr.lambda_))
