@@ -16,6 +16,21 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
         print("Init!")
         xi.numpy_data[:] = self.x0
 
+    def initialize_sparse(self, xi, lambda_):
+        print("init sparse!")
+        xi.numpy_data[:] = self.x0
+
+        constrDummy = pyBlockSQP.PyMatrix().Dimension(self.nCon)\
+                          .Initialize(0.0)
+        gradObjDummy = pyBlockSQP.PyMatrix().Dimension(self.nVar)\
+                          .Initialize(0.0)
+        constrJac = pyBlockSQP.PyMatrix().Dimension(self.nCon, self.nVar)\
+                        .Initialize(np.inf)
+
+        # TODO: evaluate sparse
+
+        return [0.0], [0], [0]
+
 x0 = np.array([10, 10.0])
 
 p = MyProblemspec(2, 1, [0, 1, 2], None, x0)
@@ -32,7 +47,8 @@ opts.blockHess = 0
 opts.whichSecondDerv = 0
 
 #opts.sparseQP = 2
-opts.sparseQP = 0
+opts.sparseQP = 1
+#opts.sparseQP = 0
 
 opts.printLevel = 2
 

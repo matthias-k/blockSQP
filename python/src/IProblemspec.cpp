@@ -25,6 +25,20 @@ void IProblemspec::initialize( Matrix &xi,            ///< optimization variable
     }
 }
 
+/// Set initial values for xi (and possibly lambda) and parts of the Jacobian that correspond to linear constraints (sparse version).
+void IProblemspec::initialize( Matrix &xi,            ///< optimization variables
+                               Matrix &lambda,        ///< Lagrange multipliers
+                               double *&jacNz,        ///< nonzero elements of constraint Jacobian
+                               int *&jacIndRow,       ///< row indices of nonzero elements
+                               int *&jacIndCol        ///< starting indices of columns
+                               ){
+    if (this->m_obj) {
+        cy_call_initialize_sparse(this->m_obj, xi, lambda, jacNz, jacIndRow, jacIndCol);
+    }
+}
+
+
+
 /// Evaluate objective, constraints, and derivatives (dense version).
 void IProblemspec::evaluate( const Matrix &xi,        ///< optimization variables
 					   const Matrix &lambda,    ///< Lagrange multipliers

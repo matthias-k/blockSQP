@@ -459,7 +459,31 @@ cdef class PyProblemspec:
             self.thisptr.blockIdx = &blockIdx_view[0]
 
     def initialize_dense(self, PyMatrix xi, PyMatrix lambda_, PyMatrix constrJac):
+        """
+        Set initial values for xi (and possibly lambda) and parts
+        of the Jacobian that correspond to linear constraints (dense version).
+        """
         pass
+
+    def initialize_sparse(self, PyMatrix xi, PyMatrix lambda_):
+        """
+        Set initial values for xi (and possibly lambda) and parts
+        of the Jacobian that correspond to linear constraints (sparse version).
+        """
+        raise NotImplementedError()
+
+#    def evaluate_dense(self,
+#                       PyMatrix xi,
+#                       PyMatrix lambda_,
+#                       double* objval,
+#                       PyMatrix constr,
+#                       PyMatrix gradObj,
+#                       PyMatrix constrJac,
+#                       PySymMatrix hess,
+#                       int dmode):
+#        raise NotImplementedError()
+
+
 
 
 cdef public api int cy_call_initialize_dense(object self,
@@ -479,15 +503,40 @@ cdef public api int cy_call_initialize_dense(object self,
 cdef public api int cy_call_initialize_sparse(object self,
                                              Matrix &xi,
                                              Matrix &lambda_,
-                                             Matrix &constrJac,
+                                             double *&jacNz,
+                                             int *&jacIndRow,
+                                             int *&jacIndCol,
                                              ):
 
     cdef PyMatrix py_xi = from_blockSQP_matrix(&xi)
     cdef PyMatrix py_lambda = from_blockSQP_matrix(&lambda_)
-    cdef PyMatrix py_constrJac = from_blockSQP_matrix(&constrJac)
 
     func = getattr(self, "initialize_sparse")
-    func(py_xi, py_lambda, py_constrJac)
+    jacNz_, jacIndRow_, jacIndCol_ = func(py_xi, py_lambda)
+
+    jacNz_ = np.ascontiguousarray(jacNz_, DTYPEd)
+    jacIndRow_ = np.ascontiguousarray(jacIndRow_, np.int32)
+    jacIndCol_ = np.ascontiguousarray(jacIndCol_, np.int32)
+
+    # make sure that memory is not freed before object terminates
+    # TODO: actually the memory is freed by blockSQP, thus
+    # it should not even be freed when PyProblemspec is garbadge collected
+    self._jacNz = jacNz_
+    self._jacIndRow = jacIndRow_
+    self._jacIndCol = jacIndCol_
+
+    cdef DTYPEd_t[::1] jacNz_view = jacNz_
+    cdef int[::1] jacIndRow_view = jacIndRow_
+    cdef int[::1] jacIndCol_view = jacIndCol_
+
+    # This ugly syntax is a workaround for
+    # https://groups.google.com/forum/#!topic/cython-users/j58Sp3QMrD4
+    (&jacNz)[0] = &jacNz_view[0]
+    (&jacIndRow)[0] = &jacIndRow_view[0]
+    (&jacIndCol)[0] = &jacIndCol_view[0]
+
+
+
 
 cdef public api int cy_call_evaluate_func_and_grad(object self,
                                                    char* method,

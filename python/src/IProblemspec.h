@@ -32,12 +32,12 @@ public:
                              );
 
     /// Set initial values for xi (and possibly lambda) and parts of the Jacobian that correspond to linear constraints (sparse version).
-    //virtual void initialize( Matrix &xi,            ///< optimization variables
-    //                         Matrix &lambda,        ///< Lagrange multipliers
-    //                         double *&jacNz,        ///< nonzero elements of constraint Jacobian
-    //                         int *&jacIndRow,       ///< row indices of nonzero elements
-    //                         int *&jacIndCol        ///< starting indices of columns
-    //                         );
+    virtual void initialize( Matrix &xi,            ///< optimization variables
+                             Matrix &lambda,        ///< Lagrange multipliers
+                             double *&jacNz,        ///< nonzero elements of constraint Jacobian
+                             int *&jacIndRow,       ///< row indices of nonzero elements
+                             int *&jacIndCol        ///< starting indices of columns
+                             );
 
 };
 	
