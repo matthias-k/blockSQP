@@ -40,6 +40,21 @@ public:
                            int *info                ///< error flag
                            );
 
+    /// Evaluate objective, constraints, and derivatives (sparse version).
+    virtual void evaluate( const Matrix &xi,        ///< optimization variables
+                           const Matrix &lambda,    ///< Lagrange multipliers
+                           double *objval,          ///< objective function value
+                           Matrix &constr,          ///< constraint function values
+                           Matrix &gradObj,         ///< gradient of objective
+                           double *&jacNz,          ///< nonzero elements of constraint Jacobian
+                           int *&jacIndRow,         ///< row indices of nonzero elements
+                           int *&jacIndCol,         ///< starting indices of columns
+                           SymMatrix *&hess,        ///< Hessian of the Lagrangian (blockwise)
+                           int dmode,               ///< derivative mode
+                           int *info                ///< error flag
+                           );
+
+
 };
 	
 }

@@ -3,6 +3,8 @@
 
 from __future__ import print_function
 
+import sys
+
 from libc.stdio cimport FILE
 cimport cpython.ref as cpy_ref
 
@@ -498,6 +500,23 @@ cdef class PyProblemspec:
         """
         raise NotImplementedError()
 
+    def evaluate_sparse(self,
+                       PyMatrix xi,
+                       PyMatrix lambda_,
+                       PyMatrix constr,
+                       PyMatrix gradObj,
+                       jacNz,
+                       jacIndRow,
+                       jacIndCol,
+                       PySymMatrix hess,
+                       int dmode):
+        """
+        Evaluate objective, constraints, and derivatives (dense version).
+        Has to return objective and update contr, gradObj, jacNz
+        and (if dmode>1) hess.
+        """
+        raise NotImplementedError()
+
 
 
 
@@ -586,9 +605,68 @@ cdef public api int cy_call_evaluate_dense(object self,
                        dmode)
         objval[0] = objVal_
     except Exception as e:
-        # self.__exception__ = sys.exc_info()
-        print("Exception in evaluate_dense")
+        self.__exception = sys.exc_info()
+        print("Exception in evaluate_sparse")
         print(e)
+        import traceback
+        traceback.print_tb(self.__exception[2])
+        info[0] = 1
+
+
+cdef public api int cy_call_evaluate_sparse(object self,
+                                           const Matrix &xi,
+                                           const Matrix &lambda_,
+                                           double *objval,
+                                           Matrix &constr,
+                                           Matrix &gradObj,
+                                           double *&jacNz,
+                                           int *&jacIndRow,
+                                           int *&jacIndCol,
+                                           SymMatrix *&hess,
+                                           int dmode,
+                                           int *info
+                                           ):
+
+    cdef PyMatrix py_xi = from_const_blockSQP_matrix(&xi)
+    cdef PyMatrix py_lambda = from_const_blockSQP_matrix(&lambda_)
+    cdef PyMatrix py_constr = from_blockSQP_matrix(&constr)
+    cdef PyMatrix py_gradObj = from_blockSQP_matrix(&gradObj)
+
+    cdef int nVar = self.nVar
+    cdef int [::1] jacIndCol_view = <int[:nVar+1]>jacIndCol
+    cdef int nnz = jacIndCol_view[nVar]
+
+    cdef DTYPEd_t[::1] jacNz_view = <DTYPEd_t[:nnz]>jacNz
+    cdef int [::1] jacIndRow_view = <int[:nnz]>jacIndRow
+
+    py_jacNz = np.asarray(jacNz_view)
+    py_jacIndRow = np.asarray(jacIndRow_view)
+    py_jacIndCol = np.asarray(jacIndCol_view)
+
+    cdef double objVal_
+
+    cdef PySymMatrix py_hess = None
+
+    if dmode == 2:
+        py_hess = from_blockSQP_symmatrix(&(hess[self.nBlocks-1]))
+    elif dmode == 3:
+        raise NotImplementedError()
+
+
+    func = getattr(self, "evaluate_sparse")
+    info[0] = 0
+    try:
+        objVal_ = func(py_xi, py_lambda, py_constr,
+                       py_gradObj, py_jacNz, py_jacIndRow,
+                       py_jacIndCol, py_hess,
+                       dmode)
+        objval[0] = objVal_
+    except Exception as e:
+        self.__exception = sys.exc_info()
+        print("Exception in evaluate_sparse")
+        print(e)
+        import traceback
+        traceback.print_tb(self.__exception[2])
         info[0] = 1
 
 

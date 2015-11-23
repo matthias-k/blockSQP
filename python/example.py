@@ -32,7 +32,7 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
 
         return self.convertJacobian(constrJac, firstCall=True)
 
-    def convertJacobian(self, constrJac, firstCall=False):
+    def convertJacobian(self, constrJac, jacNz = None, jacIndRow = None, jacIndCol = None, firstCall=False):
         constrJac_ = constrJac.as_array
         if firstCall:
             nnz = 0
@@ -46,7 +46,7 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
             jacIndCol = np.empty(self.nVar + 1, np.int32)
 
         else:
-            raise NotImplementedError()
+            nnz = jacIndCol[self.nVar]
 
         count = 0
         for j in range(self.nVar):
@@ -84,6 +84,22 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
             constrJac.as_array[0, 1] = -1.0
 
         return objval
+
+    def evaluate_sparse(self, xi, lambda_, constr,
+                        gradObj, jacNz, jacIndRow, jacIndCol,
+                        hess, dmode):
+
+        constrJac = pyBlockSQP.PyMatrix().Dimension(self.nCon, self.nVar).Initialize(np.inf)
+
+        objval = self.evaluate_dense(xi, lambda_, constr,
+                            gradObj, constrJac, hess, dmode)
+
+        if dmode != 0:
+            self.convertJacobian(constrJac, jacNz, jacIndRow, jacIndCol)
+
+        return objval
+
+
 
 x0 = np.array([10, 10.0])
 

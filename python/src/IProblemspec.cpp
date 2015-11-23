@@ -54,4 +54,23 @@ void IProblemspec::evaluate( const Matrix &xi,        ///< optimization variable
 	}
 }
 
+        /// Evaluate objective, constraints, and derivatives (sparse version).
+void IProblemspec::evaluate( const Matrix &xi,        ///< optimization variables
+                               const Matrix &lambda,    ///< Lagrange multipliers
+                               double *objval,          ///< objective function value
+                               Matrix &constr,          ///< constraint function values
+                               Matrix &gradObj,         ///< gradient of objective
+                               double *&jacNz,          ///< nonzero elements of constraint Jacobian
+                               int *&jacIndRow,         ///< row indices of nonzero elements
+                               int *&jacIndCol,         ///< starting indices of columns
+                               SymMatrix *&hess,        ///< Hessian of the Lagrangian (blockwise)
+                               int dmode,               ///< derivative mode
+                               int *info                ///< error flag
+                               ){
+    if (this->m_obj) {
+		cy_call_evaluate_sparse(this->m_obj, xi, lambda, objval, constr, gradObj,
+                                jacNz, jacIndRow, jacIndCol, hess, dmode, info);
+	}
+}
+
 }
