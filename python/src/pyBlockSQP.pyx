@@ -107,7 +107,14 @@ cdef from_blockSQP_matrix(Matrix* matrix):
 
 
 cdef class PySymMatrix(PyMatrix):
-    #cdef SymMatrix *thisptr      # hold a C++ instance which we're wrapping
+    """PySymMatrix interfaces blockSQP's SymMatrix. SymMatrix
+    describes a symmetric matrix by storing the n*(n+1)/2 elements
+    of the upper triangle. They are stored in an array layed out
+    in c order (i.e. row wise).
+
+    As numpy does not support storing symmetric matrices with
+    reduced memory, when converting from or to 2d numpy arrays,
+    the data has to be copied and extended or filtered."""
     def __cinit__(self, int m = 1, data=None, int n = 1, int ldim = -1):
         cdef DTYPEd_t [::1] data_view
         if data is not None:
@@ -172,16 +179,15 @@ cdef class PySymMatrix(PyMatrix):
 
         return cls(m, data = flat_data)
 
-    def Print(self):
-        # does not work: segfault
-        #self.thisptr.Print()
-        #return self
-        cdef int i, j
-        for i in range((<Matrix*>(self.thisptr)).M()):
-            for j in range((<Matrix*>(self.thisptr)).N()):
-                print(self.thisptr.get(i, j), end=" ")
-            print()
-        return self
+
+cdef from_blockSQP_symmatrix(SymMatrix* matrix):
+    cdef int m = matrix.M()
+    cdef int length = m*(m+1)/2
+
+    # TODO: m*n==0
+    cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:length]>matrix.array
+    return PySymMatrix(m, data_view)
+
 
 cdef class PySQPoptions:
     cdef SQPoptions *thisptr      # hold a C++ instance which we're wrapping
