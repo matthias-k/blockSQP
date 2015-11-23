@@ -602,10 +602,9 @@ cdef public api int cy_call_evaluate_dense(object self,
         objval[0] = objVal_
     except Exception as e:
         self.__exception = sys.exc_info()
-        print("Exception in evaluate_sparse")
-        print(e)
+        print("Exception in evaluate_dense:")
         import traceback
-        traceback.print_tb(self.__exception[2])
+        traceback.print_exception(*self.__exception)
         info[0] = 1
 
 
@@ -660,9 +659,8 @@ cdef public api int cy_call_evaluate_sparse(object self,
     except Exception as e:
         self.__exception = sys.exc_info()
         print("Exception in evaluate_sparse")
-        print(e)
         import traceback
-        traceback.print_tb(self.__exception[2])
+        traceback.print_exception(*self.__exception)
         info[0] = 1
 
 
