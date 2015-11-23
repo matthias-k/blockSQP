@@ -84,14 +84,7 @@ cdef class PyMatrix:
         return self
 
     def Print(self):
-        # does not work: segfault
-        #self.thisptr.Print()
-        #return self
-        cdef int i, j
-        for i in range(self.thisptr.M()):
-            for j in range(self.thisptr.N()):
-                print(self.thisptr.get(i, j), end=" ")
-            print()
+        self.thisptr.Print()
         return self
 
     def copy(self):

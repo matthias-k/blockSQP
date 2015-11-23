@@ -29,10 +29,12 @@ cdef extern from "blocksqp_matrix.hpp" namespace "blockSQP":
         Matrix &Initialize( double (*)( int, int ) )
         Matrix &Initialize( double )
 
-        const Matrix &Print( FILE* = stdout, #  ///< file for output
-                               int = 13,     #  ///< number of digits
-                               int = 1       #  ///< Flag for format
-                             ) const
+        const Matrix &Print() const
+
+#        const Matrix &Print( FILE* = stdout, #  ///< file for output
+#                               int = 13,     #  ///< number of digits
+#                               int = 1       #  ///< Flag for format
+#                             ) const
 
     cdef cppclass SymMatrix(Matrix):
         SymMatrix(int)
