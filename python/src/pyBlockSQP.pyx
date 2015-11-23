@@ -204,7 +204,7 @@ cdef from_blockSQP_symmatrix(SymMatrix* matrix):
 
     # TODO: m*n==0
     cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:length]>matrix.array
-    return PySymMatrix(m, data_view)
+    return PySymMatrix(m=m, data=data_view)
 
 
 cdef class PySQPoptions:
@@ -667,3 +667,18 @@ cdef class PySQPiterate:
     property lambda_:
         def __get__(self):
             return from_blockSQP_matrix(&(self.thisptr.lambda_))
+
+    property nBlocks:
+        def __get__(self):
+            return self.thisptr.nBlocks
+
+    property hess:
+        def __get__(self):
+            blocks = []
+            cdef int i
+            cdef SymMatrix* this_hess
+            for i in range(self.thisptr.nBlocks):
+                this_hess = &(self.thisptr.hess[i])
+                blocks.append(from_blockSQP_symmatrix(this_hess))
+            return blocks
+

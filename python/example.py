@@ -91,3 +91,7 @@ m.vars.xi.Print()
 
 print("Dual solution")
 m.vars.lambda_.Print()
+
+print("Hessian approximation at the solution:")
+for h in m.vars.hess:
+    h.Print()
