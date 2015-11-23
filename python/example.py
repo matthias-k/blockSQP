@@ -27,9 +27,42 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
         constrJac = pyBlockSQP.PyMatrix().Dimension(self.nCon, self.nVar)\
                         .Initialize(np.inf)
 
-        # TODO: evaluate sparse
+        self.evaluate_dense(xi, lambda_, constrDummy, gradObjDummy, constrJac,
+                            None, 1)
 
-        return [0.0], [0], [0]
+        return self.convertJacobian(constrJac, firstCall=True)
+
+    def convertJacobian(self, constrJac, firstCall=False):
+        constrJac_ = constrJac.as_array
+        if firstCall:
+            nnz = 0
+            for j in range(self.nVar):
+                for i in range(self.nCon):
+                    if np.abs(constrJac_[i, j]) < np.inf:
+                        nnz += 1
+
+            jacNz = np.empty(nnz)
+            jacIndRow = np.empty(nnz, np.int32)
+            jacIndCol = np.empty(self.nVar + 1, np.int32)
+
+        else:
+            raise NotImplementedError()
+
+        count = 0
+        for j in range(self.nVar):
+            jacIndCol[j] = count
+            for i in range(self.nCon):
+                if np.abs(constrJac_[i, j]) < np.inf:
+                    jacNz[count] = constrJac_[i, j]
+                    jacIndRow[count] = i
+                    count += 1
+
+        jacIndCol[self.nVar] = count
+        if count != nnz:
+            print("Error in convertJacobian: {} elements processed, should be {} elements!\n".format(count, nnz))
+
+        return jacNz, jacIndRow, jacIndCol
+
 
     def evaluate_dense(self, xi, lambda_, constr,
                        gradObj, constrJac, hess,
@@ -68,8 +101,8 @@ opts.blockHess = 0
 opts.whichSecondDerv = 0
 
 #opts.sparseQP = 2
-#opts.sparseQP = 1
-opts.sparseQP = 0
+opts.sparseQP = 1
+#opts.sparseQP = 0
 
 opts.printLevel = 2
 
