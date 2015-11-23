@@ -25,6 +25,20 @@ public:
 					   int *info                ///< error flag
 					   );
 
+    /// Set initial values for xi (and possibly lambda) and parts of the Jacobian that correspond to linear constraints (dense version).
+    virtual void initialize( Matrix &xi,            ///< optimization variables
+                             Matrix &lambda,        ///< Lagrange multipliers
+                             Matrix &constrJac      ///< constraint Jacobian (dense)
+                             );
+
+    /// Set initial values for xi (and possibly lambda) and parts of the Jacobian that correspond to linear constraints (sparse version).
+    //virtual void initialize( Matrix &xi,            ///< optimization variables
+    //                         Matrix &lambda,        ///< Lagrange multipliers
+    //                         double *&jacNz,        ///< nonzero elements of constraint Jacobian
+    //                         int *&jacIndRow,       ///< row indices of nonzero elements
+    //                         int *&jacIndCol        ///< starting indices of columns
+    //                         );
+
 };
 	
 }

@@ -14,6 +14,17 @@ IProblemspec::~IProblemspec() {
     Py_XDECREF(this->m_obj);
 }
 
+
+/// Set initial values for xi (and possibly lambda) and parts of the Jacobian that correspond to linear constraints (dense version).
+void IProblemspec::initialize( Matrix &xi,            ///< optimization variables
+                               Matrix &lambda,        ///< Lagrange multipliers
+                               Matrix &constrJac      ///< constraint Jacobian (dense)
+                              ){
+    if (this->m_obj) {
+        cy_call_initialize_dense(this->m_obj, xi, lambda, constrJac);
+    }
+}
+
 /// Evaluate objective, constraints, and derivatives (dense version).
 void IProblemspec::evaluate( const Matrix &xi,        ///< optimization variables
 					   const Matrix &lambda,    ///< Lagrange multipliers

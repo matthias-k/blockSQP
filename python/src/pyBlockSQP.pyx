@@ -398,31 +398,6 @@ cdef public api int cy_call_func(object self, char* method, int *error):
         error[0] = 0
         return func()
 
-cdef public api int cy_call_evaluate_func_and_grad(object self,
-                                                   char* method,
-                                                   int *error,
-                                                   const Matrix &xi,
-                                                   const Matrix &lambda_,
-                                                   double *objval,
-                                                   Matrix &constr,
-                                                   Matrix &gradObj,
-                                                   Matrix &constrJac,
-                                                   ):
-    cdef double [::1] xi_view
-    cdef double [::1, :] lambda_view
-
-    cdef double objval_py
-    cdef double [::1] constr_view
-    cdef double [::1, :] gradObj_view
-    cdef double [::1, :] constrJac_view
-
-    try:
-        func = getattr(self, method);
-    except AttributeError:
-        error[0] = 1
-    else:
-        error[0] = 0
-        objval_py, constr_view, gradObj_view, constrJac_view = func(xi_view, lambda_view)
 
 
 cdef class PyProblemspec:
@@ -483,6 +458,63 @@ cdef class PyProblemspec:
             self.thisptr.nBlocks = len(blockIdx_view)-1
             self.thisptr.blockIdx = &blockIdx_view[0]
 
+    def initialize_dense(self, PyMatrix xi, PyMatrix lambda_, PyMatrix constrJac):
+        pass
+
+
+cdef public api int cy_call_initialize_dense(object self,
+                                             Matrix &xi,
+                                             Matrix &lambda_,
+                                             Matrix &constrJac,
+                                             ):
+
+    cdef PyMatrix py_xi = from_blockSQP_matrix(&xi)
+    cdef PyMatrix py_lambda = from_blockSQP_matrix(&lambda_)
+    cdef PyMatrix py_constrJac = from_blockSQP_matrix(&constrJac)
+
+    func = getattr(self, "initialize_dense")
+    func(py_xi, py_lambda, py_constrJac)
+
+
+cdef public api int cy_call_initialize_sparse(object self,
+                                             Matrix &xi,
+                                             Matrix &lambda_,
+                                             Matrix &constrJac,
+                                             ):
+
+    cdef PyMatrix py_xi = from_blockSQP_matrix(&xi)
+    cdef PyMatrix py_lambda = from_blockSQP_matrix(&lambda_)
+    cdef PyMatrix py_constrJac = from_blockSQP_matrix(&constrJac)
+
+    func = getattr(self, "initialize_sparse")
+    func(py_xi, py_lambda, py_constrJac)
+
+cdef public api int cy_call_evaluate_func_and_grad(object self,
+                                                   char* method,
+                                                   int *error,
+                                                   const Matrix &xi,
+                                                   const Matrix &lambda_,
+                                                   double *objval,
+                                                   Matrix &constr,
+                                                   Matrix &gradObj,
+                                                   Matrix &constrJac,
+                                                   ):
+    cdef double [::1] xi_view
+    cdef double [::1, :] lambda_view
+
+    cdef double objval_py
+    cdef double [::1] constr_view
+    cdef double [::1, :] gradObj_view
+    cdef double [::1, :] constrJac_view
+
+    try:
+        func = getattr(self, method);
+    except AttributeError:
+        error[0] = 1
+    else:
+        error[0] = 0
+        objval_py, constr_view, gradObj_view, constrJac_view = func(xi_view, lambda_view)
+
 cdef class PySQPStats:
     cdef SQPstats *thisptr      # hold a C++ instance which we're wrapping
     def __cinit__(self, char* filename):
@@ -505,6 +537,10 @@ cdef class PySQPMethod:
 
     def __dealloc__(self):
         del self.thisptr
+
+    def init(self):
+        """Initialization, has to be called before run"""
+        self.thisptr.init()
 
 
 
