@@ -38,7 +38,6 @@ void IProblemspec::initialize( Matrix &xi,            ///< optimization variable
 }
 
 
-
 /// Evaluate objective, constraints, and derivatives (dense version).
 void IProblemspec::evaluate( const Matrix &xi,        ///< optimization variables
 					   const Matrix &lambda,    ///< Lagrange multipliers
@@ -51,10 +50,8 @@ void IProblemspec::evaluate( const Matrix &xi,        ///< optimization variable
 					   int *info                ///< error flag
 					   ){
     if (this->m_obj) {
-	    int error;
-		// Call a virtual overload, if it exists
-		cy_call_evaluate_func_and_grad(this->m_obj, (char*)"evaluate", &error,
-						               xi, lambda, objval, constr, gradObj, constrJac);
+		cy_call_evaluate_dense(this->m_obj, xi, lambda, objval, constr, gradObj, constrJac, hess, dmode, info);
 	}
 }
+
 }

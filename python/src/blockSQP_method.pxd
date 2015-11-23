@@ -12,7 +12,7 @@ cdef extern from "blocksqp_method.hpp" namespace "blockSQP":
         # Initialization, has to be called before run
         void init()
         # Main Loop of SQP method
-        int run( int maxIt, int warmStart = 0 )
+        int run( int maxIt, int warmStart )
         # Call after the last call of run, to close output files etc.
         void finish()
         # Print information about the SQP method

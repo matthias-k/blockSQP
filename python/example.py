@@ -31,6 +31,27 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
 
         return [0.0], [0], [0]
 
+    def evaluate_dense(self, xi, lambda_, constr,
+                       gradObj, constrJac, hess,
+                       dmode):
+
+        objval = 0.0
+
+        xi_ = xi.as_array.ravel()
+
+        if dmode >= 0:
+            objval = xi_[0] * xi_[0] - 0.5*xi_[1]*xi_[1]
+            constr.as_array[0] = xi_[0] - xi_[1]
+
+        if dmode > 0:
+            gradObj.as_array[0] = 2*xi_[0]
+            gradObj.as_array[1] = -xi_[0]
+
+            constrJac.as_array[0, 0] = 1.0
+            constrJac.as_array[0, 1] = -1.0
+
+        return objval
+
 x0 = np.array([10, 10.0])
 
 p = MyProblemspec(2, 1, [0, 1, 2], None, x0)
@@ -47,8 +68,8 @@ opts.blockHess = 0
 opts.whichSecondDerv = 0
 
 #opts.sparseQP = 2
-opts.sparseQP = 1
-#opts.sparseQP = 0
+#opts.sparseQP = 1
+opts.sparseQP = 0
 
 opts.printLevel = 2
 
@@ -57,3 +78,7 @@ s = pyBlockSQP.PySQPStats('./')
 m = pyBlockSQP.PySQPMethod(p, opts, s)
 
 m.init()
+
+m.run(100)
+
+m.finish()

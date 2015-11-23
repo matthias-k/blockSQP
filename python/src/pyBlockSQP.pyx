@@ -99,7 +99,15 @@ cdef class PyMatrix:
 cdef from_blockSQP_matrix(Matrix* matrix):
     cdef int m = matrix.M()
     cdef int n = matrix.N()
-    print(m, n)
+
+    # TODO: m*n==0
+    cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
+    return PyMatrix(m, n, data_view)
+
+# TODO: There should be an easier way to do this
+cdef from_const_blockSQP_matrix(const Matrix* matrix):
+    cdef int m = matrix.M()
+    cdef int n = matrix.N()
 
     # TODO: m*n==0
     cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
@@ -480,16 +488,20 @@ cdef class PyProblemspec:
         """
         raise NotImplementedError()
 
-#    def evaluate_dense(self,
-#                       PyMatrix xi,
-#                       PyMatrix lambda_,
-#                       double* objval,
-#                       PyMatrix constr,
-#                       PyMatrix gradObj,
-#                       PyMatrix constrJac,
-#                       PySymMatrix hess,
-#                       int dmode):
-#        raise NotImplementedError()
+    def evaluate_dense(self,
+                       PyMatrix xi,
+                       PyMatrix lambda_,
+                       PyMatrix constr,
+                       PyMatrix gradObj,
+                       PyMatrix constrJac,
+                       PySymMatrix hess,
+                       int dmode):
+        """
+        Evaluate objective, constraints, and derivatives (dense version).
+        Has to return objective and update contr, gradObj, contrJac
+        and (if dmode>1) hess.
+        """
+        raise NotImplementedError()
 
 
 
@@ -544,33 +556,46 @@ cdef public api int cy_call_initialize_sparse(object self,
     (&jacIndCol)[0] = &jacIndCol_view[0]
 
 
+cdef public api int cy_call_evaluate_dense(object self,
+                                           const Matrix &xi,
+                                           const Matrix &lambda_,
+                                           double *objval,
+                                           Matrix &constr,
+                                           Matrix &gradObj,
+                                           Matrix &constrJac,
+                                           SymMatrix *&hess,
+                                           int dmode,
+                                           int *info
+                                           ):
+
+    cdef PyMatrix py_xi = from_const_blockSQP_matrix(&xi)
+    cdef PyMatrix py_lambda = from_const_blockSQP_matrix(&lambda_)
+    cdef PyMatrix py_constr = from_blockSQP_matrix(&constr)
+    cdef PyMatrix py_gradObj = from_blockSQP_matrix(&gradObj)
+    cdef PyMatrix py_constrJac = from_blockSQP_matrix(&constrJac)
+    cdef double objVal_
+
+    cdef PySymMatrix py_hess = None
+
+    if dmode == 2:
+        py_hess = from_blockSQP_symmatrix(&(hess[self.nBlocks-1]))
+    elif dmode == 3:
+        raise NotImplementedError()
 
 
-cdef public api int cy_call_evaluate_func_and_grad(object self,
-                                                   char* method,
-                                                   int *error,
-                                                   const Matrix &xi,
-                                                   const Matrix &lambda_,
-                                                   double *objval,
-                                                   Matrix &constr,
-                                                   Matrix &gradObj,
-                                                   Matrix &constrJac,
-                                                   ):
-    cdef double [::1] xi_view
-    cdef double [::1, :] lambda_view
-
-    cdef double objval_py
-    cdef double [::1] constr_view
-    cdef double [::1, :] gradObj_view
-    cdef double [::1, :] constrJac_view
-
+    func = getattr(self, "evaluate_dense")
+    info[0] = 0
     try:
-        func = getattr(self, method);
-    except AttributeError:
-        error[0] = 1
-    else:
-        error[0] = 0
-        objval_py, constr_view, gradObj_view, constrJac_view = func(xi_view, lambda_view)
+        objVal_ = func(py_xi, py_lambda, py_constr,
+                       py_gradObj, py_constrJac, py_hess,
+                       dmode)
+        objval[0] = objVal_
+    except Exception as e:
+        # self.__exception__ = sys.exc_info()
+        print("Exception in evaluate_dense")
+        print(e)
+        info[0] = 1
+
 
 cdef class PySQPStats:
     cdef SQPstats *thisptr      # hold a C++ instance which we're wrapping
@@ -598,6 +623,19 @@ cdef class PySQPMethod:
     def init(self):
         """Initialization, has to be called before run"""
         self.thisptr.init()
+
+    def run(self, int maxIt, int warmStart = 0):
+        """Main Loop of SQP method"""
+        self.thisptr.run(maxIt, warmStart)
+
+    def finish(self):
+        """all after the last call of run, to close output files etc. """
+        self.thisptr.finish()
+
+    def printInfo(self, int printLevel):
+        """Print information about the SQP method"""
+        self.thisptr.printInfo(printLevel)
+
 
 
 
