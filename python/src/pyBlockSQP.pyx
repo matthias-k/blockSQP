@@ -48,7 +48,7 @@ cdef class PyMatrix:
 
         # TODO: m*n==0
         cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
-        return np.array(data_view)
+        return np.asarray(data_view)
 
     @property
     def as_array(self):
@@ -146,10 +146,18 @@ cdef class PySymMatrix(PyMatrix):
 
         # TODO: m*n==0
         cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:length]>matrix.array
-        return np.array(data_view)
+        return np.asarray(data_view)
 
     @property
     def as_array(self):
+        """
+        As numpy arrays do not support the storage
+        format of SymMatrix, this property is
+        always a copy of the actual data. Therefore you
+        should not modify it, modifications will not affect
+        the SymMatrix. If you have to modify the actual data,
+        use the property numpy_data.
+        """
         data_array = self.numpy_data
         cdef int m = self.thisptr.M()
         cdef int n = self.thisptr.N()
