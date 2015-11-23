@@ -402,16 +402,6 @@ cdef class PySQPoptions:
         def __set__(self, eta): self.thisptr.eta = eta
 
 
-cdef public api int cy_call_func(object self, char* method, int *error):
-    try:
-        func = getattr(self, method);
-    except AttributeError:
-        error[0] = 1
-    else:
-        error[0] = 0
-        return func()
-
-
 
 cdef class PyProblemspec:
     cdef IProblemspec *thisptr      # hold a C++ instance which we're wrapping
