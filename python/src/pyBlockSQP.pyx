@@ -625,18 +625,33 @@ cdef public api int cy_call_evaluate_sparse(object self,
     cdef PyMatrix py_xi = from_const_blockSQP_matrix(&xi)
     cdef PyMatrix py_lambda = from_const_blockSQP_matrix(&lambda_)
     cdef PyMatrix py_constr = from_blockSQP_matrix(&constr)
-    cdef PyMatrix py_gradObj = from_blockSQP_matrix(&gradObj)
+    cdef PyMatrix py_gradObj = None
 
-    cdef int nVar = self.nVar
-    cdef int [::1] jacIndCol_view = <int[:nVar+1]>jacIndCol
-    cdef int nnz = jacIndCol_view[nVar]
+    cdef int nVar
+    cdef int nnz
+    cdef DTYPEd_t[::1] jacNz_view = None
+    cdef int[::1] jacIndRow_view = None
+    cdef int[::1] jacIndCol_view = None
 
-    cdef DTYPEd_t[::1] jacNz_view = <DTYPEd_t[:nnz]>jacNz
-    cdef int [::1] jacIndRow_view = <int[:nnz]>jacIndRow
+    if dmode > 0:
 
-    py_jacNz = np.asarray(jacNz_view)
-    py_jacIndRow = np.asarray(jacIndRow_view)
-    py_jacIndCol = np.asarray(jacIndCol_view)
+        py_gradObj = from_blockSQP_matrix(&gradObj)
+
+        nVar = self.nVar
+        jacIndCol_view = <int[:nVar+1]>jacIndCol
+        nnz = jacIndCol_view[nVar]
+
+        jacNz_view = <DTYPEd_t[:nnz]>jacNz
+        jacIndRow_view = <int[:nnz]>jacIndRow
+
+        py_jacNz = np.asarray(jacNz_view)
+        py_jacIndRow = np.array(jacIndRow_view)
+        py_jacIndCol = np.array(jacIndCol_view)
+
+    else:
+        py_jacNz = None
+        py_jacIndRow = None
+        py_jacIndCol = None
 
     cdef double objVal_
 
