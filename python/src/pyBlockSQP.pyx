@@ -691,6 +691,61 @@ cdef class PySQPStats:
     def __dealloc__(self):
         del self.thisptr
 
+    property itCount:  # int
+        def __get__(self): return self.thisptr.itCount
+
+    property qpIterations:  # int
+        def __get__(self): return self.thisptr.qpIterations
+
+    property qpIterations2:  # int
+        def __get__(self): return self.thisptr.qpIterations2
+
+    property qpItTotal:  # int
+        def __get__(self): return self.thisptr.qpItTotal
+
+    property qpResolve:  # int
+        def __get__(self): return self.thisptr.qpResolve
+
+    property nFunCalls:  # int
+        def __get__(self): return self.thisptr.nFunCalls
+
+    property nDerCalls:  # int
+        def __get__(self): return self.thisptr.nDerCalls
+
+    property nRestHeurCalls:  # int
+        def __get__(self): return self.thisptr.nRestHeurCalls
+
+    property nRestPhaseCalls:  # int
+        def __get__(self): return self.thisptr.nRestPhaseCalls
+
+    property rejectedSR1:  # int
+        def __get__(self): return self.thisptr.rejectedSR1
+
+    property hessSkipped:  # int
+        def __get__(self): return self.thisptr.hessSkipped
+
+    property hessDamped:  # int
+        def __get__(self): return self.thisptr.hessDamped
+
+    property nTotalUpdates:  # int
+        def __get__(self): return self.thisptr.nTotalUpdates
+
+    property nTotalSkippedUpdates:  # int
+        def __get__(self): return self.thisptr.nTotalSkippedUpdates
+
+    property averageSizingFactor:  # double
+        def __get__(self): return self.thisptr.averageSizingFactor
+
+    property outpath:  # PATHSTR
+        def __get__(self): return self.thisptr.outpath
+
+    # Skipped: FILE* progressFile
+    # Skipped: FILE* updateFile
+    # Skipped: FILE* primalVarsFile
+    # Skipped: FILE* dualVarsFile
+    # Skipped: FILE* jacFile
+    # Skipped: FILE* hessFile
+
 
 cdef class PySQPMethod:
     cdef SQPmethod *thisptr      # hold a C++ instance which we're wrapping
