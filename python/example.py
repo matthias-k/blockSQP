@@ -3,13 +3,23 @@ import numpy as np
 
 
 class MyProblemspec(pyBlockSQP.PyProblemspec):
-    def __init__(self, nVar, nCon, blockIdx, bl, x):
+    def __init__(self, nVar, nCon, blockIdx, bl, bu, x):
         super(MyProblemspec, self).__init__()
         self.nVar = nVar
         self.nCon = nCon
+        self.blockIdx = np.array(blockIdx, np.int32)
+
+        print(nVar + nCon)
+        self.bl.Dimension(nVar + nCon).Initialize(-np.inf)
+        self.bu.Dimension(nVar + nCon).Initialize(np.inf)
+
+        print(self.bl.numpy_data)
+
+        self.bl.numpy_data[:] = bl
+        self.bu.numpy_data[:] = bu
+
         self.objLo = -np.inf
         self.objUp = np.inf
-        self.blockIdx = np.array(blockIdx, np.int32)
         self.x0 = x
 
     def initialize_dense(self, xi, lambda_, constrJac):
@@ -100,10 +110,16 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
         return objval
 
 
-
+nVar = 2
+nCon = 1
 x0 = np.array([10, 10.0])
+bl = np.ones(nVar + nCon) * (-np.inf)
+bu = np.ones(nVar + nCon) * np.inf
 
-p = MyProblemspec(2, 1, [0, 1, 2], None, x0)
+bl[nVar] = 0.0
+bu[nVar] = 0.0
+
+p = MyProblemspec(2, 1, [0, 1, 2], bl, bu, x0)
 opts = pyBlockSQP.PySQPoptions()
 opts.opttol = 1.0e-12
 opts.nlinfeastol = 1.0e-12
