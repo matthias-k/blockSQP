@@ -105,14 +105,8 @@ cdef from_blockSQP_matrix(Matrix* matrix):
 
     return py_matrix
 
-# TODO: There should be an easier way to do this
 cdef from_const_blockSQP_matrix(const Matrix* matrix):
-    cdef int m = matrix.M()
-    cdef int n = matrix.N()
-
-    # TODO: m*n==0
-    cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
-    return PyMatrix(m, n, data_view)
+    return from_blockSQP_matrix(<Matrix *> matrix)
 
 
 cdef class PySymMatrix(PyMatrix):
@@ -198,12 +192,12 @@ cdef class PySymMatrix(PyMatrix):
 
 
 cdef from_blockSQP_symmatrix(SymMatrix* matrix):
-    cdef int m = matrix.M()
-    cdef int length = m*(m+1)/2
+    py_matrix = PySymMatrix()
+    del py_matrix.thisptr
+    py_matrix.thisptr = <Matrix*> matrix
+    py_matrix.owns_thisptr = False
 
-    # TODO: m*n==0
-    cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:length]>matrix.array
-    return PySymMatrix(m=m, data=data_view)
+    return py_matrix
 
 
 cdef class PySQPoptions:
