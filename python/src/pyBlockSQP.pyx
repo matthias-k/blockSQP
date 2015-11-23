@@ -6,6 +6,7 @@ from __future__ import print_function
 import sys
 
 from libc.stdio cimport FILE
+from libcpp cimport bool
 cimport cpython.ref as cpy_ref
 
 from blockSQP_matrix cimport Matrix, SymMatrix
@@ -26,6 +27,7 @@ ctypedef np.double_t DTYPEd_t
 
 cdef class PyMatrix:
     cdef Matrix *thisptr      # hold a C++ instance which we're wrapping
+    cdef bool owns_thisptr
     cdef object py_data
     def __cinit__(self, int m = 1, int n = 1, data=None, int ldim = -1):
         if type(self) is not PyMatrix:
@@ -38,11 +40,13 @@ cdef class PyMatrix:
             self.thisptr.tflag = 1 #thisptr does not own the data
         else:
             self.thisptr = new Matrix(m, n, ldim)
+        self.owns_thisptr = True
 
     def __dealloc__(self):
         if type(self) is not PyMatrix:
             return
-        del self.thisptr
+        if self.owns_thisptr:
+            del self.thisptr
 
     @property
     def numpy_data(self):
@@ -94,12 +98,12 @@ cdef class PyMatrix:
 
 
 cdef from_blockSQP_matrix(Matrix* matrix):
-    cdef int m = matrix.M()
-    cdef int n = matrix.N()
+    py_matrix = PyMatrix()
+    del py_matrix.thisptr
+    py_matrix.thisptr = matrix
+    py_matrix.owns_thisptr = False
 
-    # TODO: m*n==0
-    cdef DTYPEd_t[::1] data_view = <DTYPEd_t[:m*n]>matrix.array
-    return PyMatrix(m, n, data_view)
+    return py_matrix
 
 # TODO: There should be an easier way to do this
 cdef from_const_blockSQP_matrix(const Matrix* matrix):
@@ -431,9 +435,11 @@ cdef class PyProblemspec:
         def __get__(self): return self.thisptr.objUp
         def __set__(self, double objUp): self.thisptr.objUp = objUp
 
-#    property bl:
-#        def __get__(self): return self.thisptr.bl
-#        def __set__(self, bl): self.thisptr.bl = bl
+    property bl:
+        def __get__(self): return from_blockSQP_matrix(&self.thisptr.bl)
+
+    property bu:
+        def __get__(self): return from_blockSQP_matrix(&self.thisptr.bu)
 
     property nBlocks:
         def __get__(self): return self.thisptr.nBlocks
