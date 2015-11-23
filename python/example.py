@@ -138,7 +138,7 @@ opts.sparseQP = 1
 opts.printLevel = 2
 
 
-s = pyBlockSQP.PySQPStats('./')
+s = pyBlockSQP.PySQPStats(b'./')
 m = pyBlockSQP.PySQPMethod(p, opts, s)
 
 m.init()
