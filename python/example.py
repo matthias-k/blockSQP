@@ -31,11 +31,11 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
         xi.numpy_data[:] = self.x0
 
         constrDummy = pyBlockSQP.PyMatrix().Dimension(self.nCon)\
-                          .Initialize(0.0)
+            .Initialize(0.0)
         gradObjDummy = pyBlockSQP.PyMatrix().Dimension(self.nVar)\
-                          .Initialize(0.0)
+            .Initialize(0.0)
         constrJac = pyBlockSQP.PyMatrix().Dimension(self.nCon, self.nVar)\
-                        .Initialize(np.inf)
+            .Initialize(np.inf)
 
         self.evaluate_dense(xi, lambda_, constrDummy, gradObjDummy, constrJac,
                             None, 1)
@@ -73,7 +73,6 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
 
         return jacNz, jacIndRow, jacIndCol
 
-
     def evaluate_dense(self, xi, lambda_, constr,
                        gradObj, constrJac, hess,
                        dmode):
@@ -102,7 +101,7 @@ class MyProblemspec(pyBlockSQP.PyProblemspec):
         constrJac = pyBlockSQP.PyMatrix().Dimension(self.nCon, self.nVar).Initialize(np.inf)
 
         objval = self.evaluate_dense(xi, lambda_, constr,
-                            gradObj, constrJac, hess, dmode)
+                                     gradObj, constrJac, hess, dmode)
 
         if dmode != 0:
             self.convertJacobian(constrJac, jacNz, jacIndRow, jacIndCol)
