@@ -127,9 +127,14 @@ cdef class PySymMatrix(PyMatrix):
             self.thisptr.tflag = 1 #thisptr does not own the data
         else:
             self.thisptr = <Matrix*>new SymMatrix(m, n, ldim)
+        self.owns_thisptr = True
 
     def __dealloc__(self):
-        del self.thisptr
+        cdef Matrix* temp
+        if self.owns_thisptr:
+            temp = <Matrix*> self.thisptr
+            del temp
+            self.thisptr = NULL
 
     def Dimension(self, int m, int n=1, int ldim = -1):
         (<SymMatrix*>(self.thisptr)).Dimension(m, n, ldim)
@@ -193,7 +198,12 @@ cdef class PySymMatrix(PyMatrix):
 
 cdef from_blockSQP_symmatrix(SymMatrix* matrix):
     py_matrix = PySymMatrix()
-    del py_matrix.thisptr
+    cdef SymMatrix* old_value = <SymMatrix*> py_matrix.thisptr
+    # This is a workaround for a bug: the memory would be freed
+    # twice, by Matrix and by SymMatrix. When this is fixed in
+    # blockSQP, this line should be removed.
+    old_value.array = NULL
+    del old_value
     py_matrix.thisptr = <Matrix*> matrix
     py_matrix.owns_thisptr = False
 
