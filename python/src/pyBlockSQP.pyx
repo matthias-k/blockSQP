@@ -675,6 +675,8 @@ cdef public api int cy_call_evaluate_sparse(object self,
                        py_jacIndCol, py_hess,
                        dmode)
         objval[0] = objVal_
+    except NotImplementedError:
+        info[0] = 1
     except Exception as e:
         self.__exception = sys.exc_info()
         print("Exception in evaluate_sparse")
