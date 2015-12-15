@@ -1,0 +1,28 @@
+set timeout 3600
+
+spawn ../archdefs/install_optsuite
+expect "Do you wish to install CUTEst (Y/n)?"
+send "y"
+expect "Do you require the CUTEst-Matlab interface (y/N)?"
+send "n"
+expect "(13) 64-bit MAC OS/X"
+send "6\n"
+expect "(2) Linux"
+send "2\n"
+expect "Would you like to review and modify the system commands (y/N)?"
+send "n"
+expect "(9) IBM xlf95 compiler under 64-bit linux"
+send "2\n"
+expect "Would you like to review and modify the fortran compiler settings (y/N)?"
+send "n"
+expect "(7) Sun Studio cc compiler"
+send "3\n"
+expect "Would you like to review and modify the C compiler settings (y/N)?"
+send "n"
+expect "Would you like to compile SIFDecode ... (Y/n)?"
+send "y"
+expect "Would you like to compile CUTEst ... (Y/n)? "
+send "y"
+expect "Which precision do you require for the installed subset (D/s/b) ?"
+send "d"
+interact
